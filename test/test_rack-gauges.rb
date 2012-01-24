@@ -1,6 +1,6 @@
 require File.expand_path('../helper',__FILE__)
 
-class TestRackGoogleAnalytics < Test::Unit::TestCase
+class TestRackGauges < Test::Unit::TestCase
   
   context "Asyncronous" do
     context "default" do

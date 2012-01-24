@@ -3,7 +3,7 @@ require 'erb'
 
 module Rack
 
-  class GoogleAnalytics
+  class Gauges
     
     DEFAULT = { :async => true }
 
