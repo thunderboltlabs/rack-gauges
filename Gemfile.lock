@@ -1,0 +1,25 @@
+PATH
+  remote: .
+  specs:
+    rack-gauges (0.0.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    rack (1.4.1)
+    rack-test (0.6.1)
+      rack (>= 1.0)
+    rake (0.9.2.2)
+    shoulda (2.11.3)
+    yard (0.7.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  rack
+  rack-gauges!
+  rack-test
+  rake
+  shoulda
+  yard
