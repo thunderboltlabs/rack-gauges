@@ -1,58 +1,43 @@
 require File.expand_path('../helper',__FILE__)
 
 class TestRackGauges < Test::Unit::TestCase
-  
-  context "Asyncronous" do
-    context "default" do
-      setup { mock_app :async => true, :tracker => 'somebody' }
-      should "show asyncronous tracker" do
-        get "/"
-        assert_match %r{\_gaq\.push}, last_response.body
-        assert_match %r{\'\_setAccount\', \"somebody\"}, last_response.body
-        assert_match %r{</script></head>}, last_response.body
-        assert_equal "532", last_response.headers['Content-Length']
-      end
-
-      should "not add tracker to none html content-type" do
-        get "/test.xml"
-        assert_no_match %r{\_gaq\.push}, last_response.body
-        assert_match %r{Xml here}, last_response.body
-      end
-
-      should "not add without </head>" do
-        get "/bob"
-        assert_no_match %r{\_gaq\.push}, last_response.body
-        assert_match %r{bob here}, last_response.body
-      end
+  def self.should_show_tracker
+    should "show tracker" do
+      assert_match %r{_gauges},             last_response.body
+      assert_match %r{</script>\s*</body>}, last_response.body
+      assert_match %r{content},             last_response.body
     end
-
-    context "multiple sub domains" do
-      setup { mock_app :async => true, :multiple => true, :tracker => 'gonna', :domain => 'mydomain.com' }
-      should "add multiple domain script" do
-        get "/"
-        assert_match %r{'_setDomainName', \"mydomain.com\"}, last_response.body
-        assert_equal "579", last_response.headers['Content-Length']
-      end
-    end
-    
-    context "multiple top-level domains" do
-      setup { mock_app :async => true, :top_level => true, :tracker => 'get', :domain => 'mydomain.com' }
-      should "add top_level domain script" do
-        get "/"
-        assert_match %r{'_setDomainName', 'none'}, last_response.body
-        assert_match %r{'_setAllowLinker', true}, last_response.body
-      end
-    end
-
   end
-  
-  context "Syncronous" do
-    setup { mock_app :async => false, :tracker => 'whatthe' }
-    should "show non-asyncronous tracker" do
-      get "/bob"
-      assert_match %r{_gat._getTracker}, last_response.body
-      assert_match %r{</script></body>}, last_response.body
-      assert_match %r{\"whatthe\"}, last_response.body
+
+  def self.should_not_show_tracker
+    should "not show tracker" do
+      assert_no_match %r{_gauges},  last_response.body
+      assert_no_match %r{<script>}, last_response.body
+      assert_match    %r{content},  last_response.body
+    end
+  end
+
+  context "Given an app with the tracker installed" do
+    setup { mock_app :tracker => 'somebody' }
+
+    context "a page returning a body" do
+      setup { get "/body" }
+      should_show_tracker
+    end
+
+    context "a page returning a head but no body" do
+      setup { get "/head" }
+      should_not_show_tracker
+    end
+
+    context "a page returning XML" do
+      setup { get "/xml" }
+      should_not_show_tracker
+    end
+
+    context "a page returning 404" do
+      setup { get "/no_such_path" }
+      should_not_show_tracker
     end
   end
 end
